@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+from util import Stack
 
 class SearchProblem:
     """
@@ -89,7 +90,47 @@ def depthFirstSearch(problem):
     print "Start:", problem.getStartState()
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    util.raiseNotDefined()
+    -
+    Start: (5, 5)
+    Is the start a goal? False
+    Start's successors: [((5, 4), 'South', 1), ((4, 5), 'West', 1)]
+    successor: (nextState, action, cost)
+    """
+    "*** YOUR CODE HERE ***"
+
+    dfsStack = Stack()
+    geheugen = []
+
+    #successors = problem.getSuccessors(problem.getStartState())
+
+    dfsStack.push(problem.getStartState)
+    print "hi"
+    print dfsStack
+    if problem.isGoalState(dfsStack[0]) == False:
+        for x in problem.getSuccessors(dfsStack[0]):
+            dfsStack.push(problem.getSuccessors(dfsStack[0])[x])
+            if problem.getSuccessors(dfsStack[0])[x].isEmpty:
+                geheugen.append(dfsStack[0][x])
+                dfsStack.pop()
+
+    else:
+        print dfsStack
+        return dfsStack
+
+
+
+#if problem.isGoalState(successors[0]) == False:
+    #dfsStack.push("hello")
+    #dfsStack.push("Hi")
+    #if (dfsStack.isEmpty() == True):
+    #    print "yes"
+    #else: print "no"
+
+    #return
+    #util.raiseNotDefined()
+
+
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
