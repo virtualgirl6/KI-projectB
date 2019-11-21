@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+from util import Stack
 
 class SearchProblem:
     """
@@ -85,9 +86,47 @@ def depthFirstSearch(problem):
     print "Start:", problem.getStartState()
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    -
+    Start: (5, 5)
+    Is the start a goal? False
+    Start's successors: [((5, 4), 'South', 1), ((4, 5), 'West', 1)]
+    successor: (nextState, action, cost)
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    dfsStack = Stack()
+    geheugen = []
+
+    #successors = problem.getSuccessors(problem.getStartState())
+
+    dfsStack.push(problem.getStartState)
+    print "hi"
+    print dfsStack
+    if problem.isGoalState(dfsStack[0]) == False:
+        for x in problem.getSuccessors(dfsStack[0]):
+            dfsStack.push(problem.getSuccessors(dfsStack[0])[x])
+            if problem.getSuccessors(dfsStack[0])[x].isEmpty:
+                geheugen.append(dfsStack[0][x])
+                dfsStack.pop()
+
+    else:
+        print dfsStack
+        return dfsStack
+
+
+
+#if problem.isGoalState(successors[0]) == False:
+    #dfsStack.push("hello")
+    #dfsStack.push("Hi")
+    #if (dfsStack.isEmpty() == True):
+    #    print "yes"
+    #else: print "no"
+
+    #return
+    #util.raiseNotDefined()
+
+
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
