@@ -96,34 +96,32 @@ def depthFirstSearch(problem):
 
     dfsStack = Stack()
     geheugen = []
-
+    actions = []
+    costs = 0
     #successors = problem.getSuccessors(problem.getStartState())
 
-    dfsStack.push(problem.getStartState)
+    dfsStack.push((problem.getStartState(), actions, costs))
+
+    if dfsStack.isEmpty():
+        print "yes"
+    else: print "no"
     print "hi"
-    print dfsStack
-    if problem.isGoalState(dfsStack[0]) == False:
-        for x in problem.getSuccessors(dfsStack[0]):
-            dfsStack.push(problem.getSuccessors(dfsStack[0])[x])
-            if problem.getSuccessors(dfsStack[0])[x].isEmpty:
-                geheugen.append(dfsStack[0][x])
-                dfsStack.pop()
+    print (problem.getSuccessors(problem.getStartState()))
 
-    else:
-        print dfsStack
-        return dfsStack
+    for node, actions, cost in problem.getSuccessors(problem.getStartState()):
+        while not problem.isGoalState(node):
+            while node not in geheugen:
+                problem.getSuccessors(node)
+                dfsStack.push(node)
+                geheugen.append(node)
+                if len(problem.getSuccessors(node)) == 0:
+                    dfsStack.pop(node)
+                    geheugen.append(node)
+    print geheugen
 
 
+    return pathlist
 
-#if problem.isGoalState(successors[0]) == False:
-    #dfsStack.push("hello")
-    #dfsStack.push("Hi")
-    #if (dfsStack.isEmpty() == True):
-    #    print "yes"
-    #else: print "no"
-
-    #return
-    #util.raiseNotDefined()
 
 
 
