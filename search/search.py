@@ -83,10 +83,6 @@ def depthFirstSearch(problem):
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
 
-
-    """
-    "*** YOUR CODE HERE ***"
-
     print "Start:", problem.getStartState()
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
@@ -103,15 +99,7 @@ def depthFirstSearch(problem):
 
     #successors = problem.getSuccessors(problem.getStartState())
 
-    dfsStack.push(problem.getStartState)
-    print "hi"
-    print dfsStack
-    if problem.isGoalState(dfsStack[0]) == False:
-        for x in problem.getSuccessors(dfsStack[0]):
-            dfsStack.push(problem.getSuccessors(dfsStack[0])[x])
-            if problem.getSuccessors(dfsStack[0])[x].isEmpty:
-                geheugen.append(dfsStack[0][x])
-                dfsStack.pop()
+    
 
     else:
         print dfsStack
@@ -119,7 +107,7 @@ def depthFirstSearch(problem):
 
 
 
-#if problem.isGoalState(successors[0]) == False:
+    #if problem.isGoalState(successors[0]) == False:
     #dfsStack.push("hello")
     #dfsStack.push("Hi")
     #if (dfsStack.isEmpty() == True):
