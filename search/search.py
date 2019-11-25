@@ -18,7 +18,6 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-from util import Stack
 
 class SearchProblem:
     """
@@ -94,40 +93,82 @@ def depthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
 
+    from util import Stack
+
     dfsStack = Stack()
-    geheugen = []
+    geheugen = set()
+    actions = []
+    costs = 0
 
-    #successors = problem.getSuccessors(problem.getStartState())
+    #pusht de buren van de startstate, door deze eerst te pushen krijg je niet een 'loze' startstate in de actions list
+    # daarnaast is (node, actions) een tuple waarbij actions een lijst met tot dan toe ondernomen stappen
+    geheugen.add(problem.getStartState())
+    for node in problem.getSuccessors(problem.getStartState()):
+        dfsStack.push((node, actions[:]))
 
-    
+    #Zolang niet leeg worden een voor een de nodes gecheckt
+    while not dfsStack.isEmpty():
+        current_Node = dfsStack.pop()
+        geheugen.add(current_Node[0][0])  #add node in geheugen nadat deze gepopt wordt (closed list) hierdoor wordt voorkomen dat je telkens een stap terug doet
+        #print(current_Node[0][0])
+        current_Node[1].append(current_Node[0][1]) # hier voeg je de richting toe waarin pacman loopt
+        #print(current_Node[1])
 
-    else:
-        print dfsStack
-        return dfsStack
+        if problem.isGoalState(current_Node[0][0]): # als goal state --> stop
+            #print(len(current_Node[1]))
+            return current_Node[1]                  # nu hoeft simpelweg de actions hoe we in de node terecht gekomen zijn gereturnt te worden
 
+        for x in problem.getSuccessors(current_Node[0][0]):
+            if x[0] not in geheugen:
+                dfsStack.push((x, current_Node[1][:]))
 
-
-    #if problem.isGoalState(successors[0]) == False:
-    #dfsStack.push("hello")
-    #dfsStack.push("Hi")
-    #if (dfsStack.isEmpty() == True):
-    #    print "yes"
-    #else: print "no"
-
-    #return
-    #util.raiseNotDefined()
-
-
+    return "No path available"
 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    from util import Queue
+    bfsQueue = Queue()
+    geheugen = set()
+    actions = []
+    costs = 0
+
+    geheugen.add(problem.getStartState())
+    for node in problem.getSuccessors(problem.getStartState()):
+        geheugen.add(node[0])
+        bfsQueue.push((node, actions[:]))
+
+
+    while not bfsQueue.isEmpty():
+
+        current_Node = bfsQueue.pop()
+
+
+        current_Node[1].append(current_Node[0][1])
+
+        if problem.isGoalState(current_Node[0][0]):
+            return current_Node[1]
+
+
+        for x in problem.getSuccessors(current_Node[0][0]):
+            if x[0] not in geheugen:
+                geheugen.add(x[0])
+                bfsQueue.push((x, current_Node[1][:]))
+
+
+    return "No path available"
+
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    from util import PriorityQueueWithFunction
+
+    ucsQueue =
+
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
