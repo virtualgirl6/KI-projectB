@@ -164,12 +164,36 @@ def breadthFirstSearch(problem):
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    from util import PriorityQueueWithFunction
 
-    ucsQueue =
+    from util import PriorityQueue
+    ucsQueue = PriorityQueue()
+    geheugen = dict()
+    actions = []
 
-    util.raiseNotDefined()
+    geheugen[problem.getStartState()] = 0
+    for node in problem.getSuccessors(problem.getStartState()):
+        ucsQueue.push((node, actions[:]), node[2])
+        geheugen[node[0]] = node[2]
+    
+    while not ucsQueue.isEmpty():
+        
+        current_Node = ucsQueue.pop()
+        print(current_Node)
+        current_Node[1].append(current_Node[0][1])
+
+        if problem.isGoalState(current_Node[0][0]):
+            return current_Node[1]
+
+        for node in problem.getSuccessors(current_Node[0][0]):
+            costSoFar = geheugen[current_Node[0][0]] + node[2]
+            if node[0] not in (geheugen):
+                ucsQueue.push((node, current_Node[1][:]), costSoFar)
+                geheugen[node[0]] = costSoFar
+            elif geheugen[node[0]] > costSoFar:
+                ucsQueue.push((node, current_Node[1][:]), costSoFar)
+                geheugen[node[0]] = costSoFar
+
+    return "No path available"
 
 def nullHeuristic(state, problem=None):
     """
