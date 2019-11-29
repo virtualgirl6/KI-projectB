@@ -204,9 +204,6 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-
-
 
     from util import PriorityQueue
     aStarQueue = PriorityQueue()
@@ -215,13 +212,11 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     geheugen[problem.getStartState()] = 0
     for node in problem.getSuccessors(problem.getStartState()):
-        aStarQueue.push((node, actions[:]), node[2])
+        aStarQueue.push((node, actions[:]), node[2] + heuristic(node[0], problem) )
         geheugen[node[0]] = node[2]
 
     while not aStarQueue.isEmpty():
-
         current_Node = aStarQueue.pop()
-        print(current_Node)
         current_Node[1].append(current_Node[0][1])
 
         if problem.isGoalState(current_Node[0][0]):
@@ -229,24 +224,14 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
         for node in problem.getSuccessors(current_Node[0][0]):
             costSoFar = geheugen[current_Node[0][0]] + node[2]
-            print "he"
-            print heuristic(node[0], problem)
-            print costSoFar
             if node[0] not in (geheugen):
                 aStarQueue.push((node, current_Node[1][:]), costSoFar + heuristic(node[0], problem))
-                geheugen[node[0]] = costSoFar + heuristic(node[0], problem)
-            elif geheugen[node[0]] > costSoFar + heuristic(node[0], problem):
+                geheugen[node[0]] = costSoFar 
+            elif geheugen[node[0]] > costSoFar:
                 aStarQueue.push((node, current_Node[1][:]), costSoFar + heuristic(node[0], problem))
-                geheugen[node[0]] = costSoFar + heuristic(node[0], problem)
+                geheugen[node[0]] = costSoFar 
 
     return "No path available"
-
-
-
-
-
-    util.raiseNotDefined()
-
 
 # Abbreviations
 bfs = breadthFirstSearch
