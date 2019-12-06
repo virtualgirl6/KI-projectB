@@ -43,36 +43,20 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.iterations = iterations
         self.values = util.Counter() # A Counter is a dict with default 0
 
-        for state in mdp.getStates():
-            self.values[state] = 0
-
-
-        for i in range(5):
+        for i in range(self.iterations):
             tempValues = self.values.copy()
-            print("in de looooooop")
-            if i == 0:
-                for state in mdp.getStates():
-                    self.values[state] = 0
-            if i == 1:
-                for state in mdp.getStates():
-                    for action in mdp.getPossibleActions(state):
-                        if action == 'exit':
-                            self.values[state] = mdp.getReward(state, action, 'TERMINAL_STATE')
-            else:
-                for state in mdp.getStates():
+            for state in mdp.getStates():
+                if not mdp.isTerminal(state):
                     tempMaxAction = util.Counter()
-                    #print("state: ", state)
-                    if not mdp.isTerminal(state):
-                        for action in mdp.getPossibleActions(state):
-                            if action != 'exit':
-                                for nextState, prob in mdp.getTransitionStatesAndProbs(state, action):
-                                    tempMaxAction[action] += prob * (mdp.getReward(state, action, nextState) + self.discount * self.values[nextState])
-                                #print( "argsmaxxed ervan: ", tempMaxAction[tempMaxAction.argMax()])
-                                tempValues[state] = tempMaxAction[tempMaxAction.argMax()]
-                            else:
-                                tempValues[state] = mdp.getReward(state, action, 'TERMINAL_STATE')
-                self.values = tempValues.copy()
-            print(self.values)
+                    for action in mdp.getPossibleActions(state):
+                        for nextState, prob in mdp.getTransitionStatesAndProbs(state, action):
+                            tempMaxAction[action] += prob * (mdp.getReward(state, action, nextState) + self.discount * self.values[nextState]) 
+                    tempValues[state] = tempMaxAction[tempMaxAction.argMax()]      
+                else:
+                    tempValues[state] = 0
+            self.values = tempValues
+
+ 
 
     def getValue(self, state):
         """
@@ -88,13 +72,9 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
         "*** YOUR CODE HERE ***"
         Qvalue = 0
-        if action != 'exit':
-            for nextState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
-                Qvalue += prob * (self.mdp.getReward(state, action, nextState) + self.discount * self.values[nextState])
-            return Qvalue
-        elif not self.mdp.isTerminal(state):
-            return self.mdp.getReward(state, action, 'TERMINAL_STATE')
-        return 0
+        for nextState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
+            Qvalue += prob * (self.mdp.getReward(state, action, nextState) + self.discount * self.values[nextState])
+        return Qvalue
 
     def computeActionFromValues(self, state):
         """
@@ -106,7 +86,14 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        return self.values.argMax()
+        if self.mdp.isTerminal(state):
+            return None 
+        else:
+            tempMaxAction = util.Counter()
+            for action in self.mdp.getPossibleActions(state):
+                for nextState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
+                    tempMaxAction[action] += prob * (self.mdp.getReward(state, action, nextState) + self.discount * self.values[nextState]) 
+            return tempMaxAction.argMax() 
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
