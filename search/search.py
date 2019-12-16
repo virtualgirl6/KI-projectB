@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-#
+# 
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -84,101 +84,119 @@ def depthFirstSearch(problem):
 
     print "Start:", problem.getStartState()
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    -
-    Start: (5, 5)
-    Is the start a goal? False
-    Start's successors: [((5, 4), 'South', 1), ((4, 5), 'West', 1)]
-    successor: (nextState, action, cost)
+    print "Start's successors:", problem.getSuccessors(problem.getStartState())            
     """
-    "*** YOUR CODE HERE ***"
-
     from util import Stack
 
-    dfsStack = Stack()
+    # On initialization creates stack for the open list, 
+    # a set for seen states 
+    # and list which will contain the actions corresponding to the state it belongs to.
+    dfsStack = Stack() 
     geheugen = set()
     actions = []
-    costs = 0
 
-    #pusht de buren van de startstate, door deze eerst te pushen krijg je niet een 'loze' startstate in de actions list
-    # daarnaast is (node, actions) een tuple waarbij actions een lijst met tot dan toe ondernomen stappen
+
+
+    # We add the startstate to the memory and push the neighbouring states,
+    # as a (state, action) tuple on the dfsStack, ready to be processed.
     geheugen.add(problem.getStartState())
     for node in problem.getSuccessors(problem.getStartState()):
-        dfsStack.push((node, actions[:]))
+        dfsStack.push((node, actions[:]))                            
 
-    #Zolang niet leeg worden een voor een de nodes gecheckt
+    # While the dfsStack is not empty:
+    #   - we will pop a state from the stack
+    #   - add it to the memory 
+    #   - add the corresponding direction the the action list of the state being processed
+    #   - check if the current state is a goal state, if so return the action list
+    #   - add the succesor nodes to the dfsStack if we havent seen them yet
+    # if the stack is empty and we havent found the goals state returns None
     while not dfsStack.isEmpty():
         current_Node = dfsStack.pop()
-        geheugen.add(current_Node[0][0])  #add node in geheugen nadat deze gepopt wordt (closed list) hierdoor wordt voorkomen dat je telkens een stap terug doet
-        #print(current_Node[0][0])
-        current_Node[1].append(current_Node[0][1]) # hier voeg je de richting toe waarin pacman loopt
-        #print(current_Node[1])
-
-        if problem.isGoalState(current_Node[0][0]): # als goal state --> stop
-            #print(len(current_Node[1]))
-            return current_Node[1]                  # nu hoeft simpelweg de actions hoe we in de node terecht gekomen zijn gereturnt te worden
+        geheugen.add(current_Node[0][0]) 
+        current_Node[1].append(current_Node[0][1]) 
+        
+        if problem.isGoalState(current_Node[0][0]): 
+            return current_Node[1]                 
 
         for x in problem.getSuccessors(current_Node[0][0]):
             if x[0] not in geheugen:
                 dfsStack.push((x, current_Node[1][:]))
 
-    return "No path available"
-
+    return None
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-
+    """
+    Search the shallowest nodes in the search tree first.
+    """
     from util import Queue
+
+    # On initialization creates Queue for the open list,
+    # a set for seen states
+    # and list which will contain the actions corresponding to the state it belongs to.
     bfsQueue = Queue()
     geheugen = set()
     actions = []
-    costs = 0
 
+    # We add the startstate to the memory and push the neighbouring states
+    # as a (state, action) tuple on the bfsQueue and adding them to the memory.
     geheugen.add(problem.getStartState())
     for node in problem.getSuccessors(problem.getStartState()):
         geheugen.add(node[0])
         bfsQueue.push((node, actions[:]))
 
-
+    # While the bfsQueue is not empty:
+    #   - we will pop a state from the Queue
+    #   - add the corresponding direction the the action list of the state being processed
+    #   - check if the current state is a goal state, if so return the action list
+    #   - add the succesor nodes to the bfsQueue if we havent seen them yet
+    #   - and add it to the memory 
+    # if the queue is empty and we havent found the goals state returns None
     while not bfsQueue.isEmpty():
-
         current_Node = bfsQueue.pop()
-
-
         current_Node[1].append(current_Node[0][1])
 
         if problem.isGoalState(current_Node[0][0]):
             return current_Node[1]
 
-
         for x in problem.getSuccessors(current_Node[0][0]):
             if x[0] not in geheugen:
                 geheugen.add(x[0])
                 bfsQueue.push((x, current_Node[1][:]))
-
-
-    return "No path available"
-
+    return None
 
 
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-
+    """Search the node of least total cost first.
+    """
     from util import PriorityQueue
+
+    # On initialization creates PriorityQueue for the open list, 
+    # a dictionary where we keep track of the seen states and the cost for reaching the states
+    # and list which will contain the actions corresponding to the state it belongs to.
     ucsQueue = PriorityQueue()
     geheugen = dict()
     actions = []
 
+    # Set the cost of the startstate to 0
+    # for each succesor state we:
+    #   - push the state in the uscQueue based on the cost to reach it
+    #   - add the node to the memory with the corresponding cost
     geheugen[problem.getStartState()] = 0
     for node in problem.getSuccessors(problem.getStartState()):
         ucsQueue.push((node, actions[:]), node[2])
         geheugen[node[0]] = node[2]
-
+    
+    # While the uscQueue is not empty:
+    #   - we will pop a state from the Queue
+    #   - add the corresponding direction the the action list of the state being processed
+    #   - check if the current state is a goal state, if so return the action list
+    #   - for the succesor states:
+    #       - compute the cost to reach the state
+    #       - if we havent seen the state yet add it to the memory
+    #       - else if the succesor we are looking at is cheaper to reach via this path then update the memory
+    # if the queue is empty and we havent found the goals state returns None
     while not ucsQueue.isEmpty():
-
         current_Node = ucsQueue.pop()
-        print(current_Node)
         current_Node[1].append(current_Node[0][1])
 
         if problem.isGoalState(current_Node[0][0]):
@@ -192,8 +210,7 @@ def uniformCostSearch(problem):
             elif geheugen[node[0]] > costSoFar:
                 ucsQueue.push((node, current_Node[1][:]), costSoFar)
                 geheugen[node[0]] = costSoFar
-
-    return "No path available"
+    return None
 
 def nullHeuristic(state, problem=None):
     """
@@ -203,18 +220,37 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-
+    """
+    Search the node that has the lowest combined cost and heuristic first.
+    """
     from util import PriorityQueue
+
+    # On initialization creates PriorityQueue for the open list, 
+    # a dictionary where we keep track of the seen states and the cost for reaching the states
+    # and list which will contain the actions corresponding to the state it belongs to.
     aStarQueue = PriorityQueue()
     geheugen = dict()
     actions = []
 
+    # Set the cost of the startstate to 0
+    # for each succesor state we:
+    #   - push the state in the aStarQueue based on the cost to reach it but this time with the added heuristic costs
+    #   - add the node to the memory with the corresponding cost
     geheugen[problem.getStartState()] = 0
     for node in problem.getSuccessors(problem.getStartState()):
         aStarQueue.push((node, actions[:]), node[2] + heuristic(node[0], problem) )
         geheugen[node[0]] = node[2]
 
+
+    # While the aStarQueue is not empty:
+    #   - we will pop a state from the Queue
+    #   - add the corresponding direction the the action list of the state being processed
+    #   - check if the current state is a goal state, if so return the action list
+    #   - for the succesor states:
+    #       - compute the cost to reach the state
+    #       - if we havent seen the state yet add it to the memory and push it in the queue based on cost(=pathcosts + heuristic)
+    #       - else if the succesor we are looking at is cheaper to reach via this path then update the memory and push it on the queue
+    # if the queue is empty and we havent found the goals state returns None
     while not aStarQueue.isEmpty():
         current_Node = aStarQueue.pop()
         current_Node[1].append(current_Node[0][1])
@@ -230,8 +266,9 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             elif geheugen[node[0]] > costSoFar:
                 aStarQueue.push((node, current_Node[1][:]), costSoFar + heuristic(node[0], problem))
                 geheugen[node[0]] = costSoFar 
+    return None
 
-    return "No path available"
+
 
 # Abbreviations
 bfs = breadthFirstSearch
