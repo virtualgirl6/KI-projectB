@@ -41,7 +41,7 @@ class QLearningAgent(ReinforcementAgent):
     def __init__(self, **args):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
-        # Create an empty Counter where every (state,action) is 0 by default.
+        # Create an empty Counter where every (state,action) is 0 by default as desired since we havent explored any of the actions yet.
         self.Qvalues = util.Counter()
 
     def getQValue(self, state, action):
@@ -61,9 +61,8 @@ class QLearningAgent(ReinforcementAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
-        # If getLegalActions returns an empty list (which is the case only if its a terminal state) returns 0, else computes the Qvalue
+        # If getLegalActions returns an empty list (which is the case only if its a terminal state) returns 0, else computes the Q-value
         if not self.getLegalActions(state):
-          print("terminal") 
           return 0.0
         else:
           tempStateActionList = util.Counter()
@@ -78,6 +77,8 @@ class QLearningAgent(ReinforcementAgent):
           are no legal actions, which is the case at the terminal state,
           you should return None.
         """
+        # First checks if the state is a terminal state, if so returns None
+        # Else returns the action corresponding with the highest Q-value
         if not self.getLegalActions(state):
           return None
         else:
@@ -98,7 +99,8 @@ class QLearningAgent(ReinforcementAgent):
           HINT: You might want to use util.flipCoin(prob)
           HINT: To pick randomly from a list, use random.choice(list)
         """
-        # Pick Action
+        # If state is a terminal state returns None.
+        # Else returns a random action from legalActions based on P(self.epsilon) and the best possible action with chance p(1-self.epsilon)
         legalActions = self.getLegalActions(state)
         "*** YOUR CODE HERE ***"
         
@@ -118,6 +120,8 @@ class QLearningAgent(ReinforcementAgent):
           NOTE: You should never call this function,
           it will be called on your behalf
         """
+        # Updates the Q-value of the given state using the action, nextState and reward. 
+        # Uses the following update function: Q_k+1 = (1-alpha)Q_k(state,action) + alpha(R(state,action,nextState) + discount*Q(nextState,action))
         self.Qvalues[(state,action)] = (1 - self.alpha) * self.getQValue(state, action) + self.alpha * ( reward + self.discount * self.computeValueFromQValues(nextState))
 
 

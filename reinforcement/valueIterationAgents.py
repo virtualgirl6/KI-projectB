@@ -38,11 +38,18 @@ class ValueIterationAgent(ValueEstimationAgent):
               mdp.getReward(state, action, nextState)
               mdp.isTerminal(state)
         """
+        
+        # initalization; creates a MDP, discount factor, number of itarations and a Counter dictionary in which all values are 0 by default.
         self.mdp = mdp
         self.discount = discount
         self.iterations = iterations
-        self.values = util.Counter() # A Counter is a dict with default 0
+        self.values = util.Counter() 
 
+        #for the specified number of iterations in self.iterations we:
+        # first copy the values in tempValues so we can access the old values while updating the new values
+        # for each statein the model we:
+        #   check if its a terminal state(if so value = 0)
+        #   Else update the value according to V_k+1(state) =  T(state,action,nextState) * (R(state,actionnextState) + discount * V_k(nextState))
         for i in range(self.iterations):
             tempValues = self.values.copy()
             for state in mdp.getStates():
@@ -62,6 +69,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
           Return the value of the state (computed in __init__).
         """
+        # self.values stores the values for each state we can simply acces it by looking it up in the Counter
         return self.values[state]
 
 
@@ -71,6 +79,8 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
+        # compute the Q-value where Q(state,action) = max_a{sum_nextStates T(state,action,nextState) * (R(state,action,nextState) + discount * V_k(nextState))}
+        # note: if self.mdp.getTransitionStatesAndProbs(state, action) is empty, then Qvalue = 0
         Qvalue = 0
         for nextState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
             Qvalue += prob * (self.mdp.getReward(state, action, nextState) + self.discount * self.values[nextState])
@@ -86,6 +96,9 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
+        #returns the best action available
+        #in the case the state is a terminal state this is None
+        #else we compute the Qvalues for the available actions and return the action which correspondes with the highest Qvalue
         if self.mdp.isTerminal(state):
             return None 
         else:
