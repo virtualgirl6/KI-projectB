@@ -103,10 +103,12 @@ class MiraClassifier:
         """
         "*** YOUR CODE HERE ***"
 
-        trainWeights = self.weights
+        #trainWeights = self.weights.copy()
         bestWeights = {}
         bestAccuracy = None
-        c = Cgrid[2]
+        c = Cgrid[0]
+        buiten = 0
+        binnen = 0
         for i in range(self.max_iterations):
             for j in range(len(trainingData)):
 
@@ -114,10 +116,11 @@ class MiraClassifier:
                 vector = util.Counter()
 
                 for label in self.legalLabels:
-                    vector[label] = trainWeights[label] * datum #score
+                    vector[label] = self.weights[label] * datum #score
 
-                wy = trainWeights[vector.argMax()]
-                wyp = trainWeights[trainingLabels[j]]
+                #print(self.weights)
+                wy = self.weights[vector.argMax()]
+                wyp = self.weights[trainingLabels[j]]
 
                 tau = min(c,((wyp - wy) * datum + 1.0) / ( 2 * (datum * datum)))
 
@@ -126,10 +129,14 @@ class MiraClassifier:
                 for d in tempDatum:
                     tempDatum[d] *= tau
 
-                if wy != wyp:
-                    wyp += tempDatum
-                    wy -= tempDatum
-
+                buiten += 1
+                print("wy: ", vector.argMax(), "wyp: ", trainingLabels[j])
+                if vector.argMax() != trainingLabels[j]:
+                    binnen += 1
+                    self.weights[trainingLabels[j]] += tempDatum
+                    self.weights[vector.argMax()] -= tempDatum
+                print("buiten: ", buiten, "binnen: ", binnen)
+        """
         correct = 0
         guesses = self.classify(validationData)
         for i, guess in enumerate(guesses):
@@ -139,8 +146,9 @@ class MiraClassifier:
         if accuracy > bestAccuracy or bestAccuracy is None:
             bestAccuracy = accuracy
             bestWeights = trainWeights
+        """
 
-        self.weights = bestWeights
+        #self.weights = trainWeights.copy()
 
 
 
@@ -190,6 +198,7 @@ class MiraClassifier:
                                 print(wyprime)
                 # max C ophalen
                 #datum is counter, moeten value gebruiken? oid
+
     def classify(self, data ):
         """
         Classifies each datum as the label that most closely matches the prototype vector
