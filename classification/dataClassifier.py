@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-#
+# 
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -76,11 +76,54 @@ def enhancedFeatureExtractorDigit(datum):
     ##
     """
     features =  basicFeatureExtractorDigit(datum)
+    
+    features = basicFeatureExtractorDigit(datum)
+    pixels = datum.getPixels()
 
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    nmbrXSymmetricPixels = 0
+    nmbrYSymmetricPixels = 0
+    #print("x: ", DIGIT_DATUM_WIDTH, "y: ", DIGIT_DATUM_HEIGHT)
+    #check for vertical symmetry 
+
+    #dubbele for-loop om alle pixels af te gaan
+    """
+    daarna wordt xs/ys elke keer de symmetrische bijbehorende pixel 
+    plus check of ze gelijk zijn --> maak een nieuwe key/val in de features dictionary en dan 1 als ze gelijk zijn of 0 als anders
+    of op de manier eronder als er meer dan x aantal pixels symmetrisch zijn dan wordt het 1 anders 0
+
+    tot nu toe wordt de score eigenlijk alleen maar slechter.. :(
+
+    
+    """
+    for x in range(DIGIT_DATUM_WIDTH):
+        xs = DIGIT_DATUM_WIDTH - x - 1  
+        for y in range(DIGIT_DATUM_HEIGHT):
+            ys = DIGIT_DATUM_HEIGHT - y - 1
+            if datum.getPixel(x, y) == datum.getPixel(xs, y):
+                nmbrXSymmetricPixels += 1
+                features[("xsym",x,xs)] = 1
+            else:
+                features[("xsym",x,xs)] = 0
+            if datum.getPixel(x, y) == datum.getPixel(x, ys):
+                nmbrYSymmetricPixels += 1
+                features[("ysym",x,xs)] = 1
+            else:
+                features[("ysym",y,ys)] = 0
+
+    """
+    if nmbrXSymmetricPixels > 650:
+        features["x sym"] = 1
+    else:
+        features["x sym"] = 0
+    if nmbrYSymmetricPixels > 650:
+        features["y sym"] = 1
+    else:
+        features["y sym"] = 0
+    """
 
     return features
+
+
 
 
 
@@ -366,7 +409,7 @@ def runClassifier(args, options):
     featureFunction = args['featureFunction']
     classifier = args['classifier']
     printImage = args['printImage']
-
+    
     # Load data
     numTraining = options.training
     numTest = options.test
@@ -394,7 +437,6 @@ def runClassifier(args, options):
         validationLabels = samples.loadLabelsFile("digitdata/validationlabels", numTest)
         rawTestData = samples.loadDataFile("digitdata/testimages", numTest,DIGIT_DATUM_WIDTH,DIGIT_DATUM_HEIGHT)
         testLabels = samples.loadLabelsFile("digitdata/testlabels", numTest)
-
 
     # Extract features
     print "Extracting features..."
@@ -428,6 +470,11 @@ def runClassifier(args, options):
         printImage(features_odds)
 
     if((options.weights) & (options.classifier == "perceptron")):
+        for l in classifier.legalLabels:
+            features_weights = classifier.findHighWeightFeatures(l)
+            print ("=== Features with high weight for label %d ==="%l)
+            printImage(features_weights)
+    elif((options.weights) & (options.classifier == "mira")):
         for l in classifier.legalLabels:
             features_weights = classifier.findHighWeightFeatures(l)
             print ("=== Features with high weight for label %d ==="%l)
