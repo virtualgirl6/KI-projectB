@@ -75,35 +75,39 @@ class MiraClassifier:
                     datum = trainingData[j]
                     vector = util.Counter()
 
-                    #update the weights
+                    #Compute updated weights
                     for label in self.legalLabels:
                         vector[label] = tempWeight[label] * datum
 
                     #calculate  for label y the weight and weightprime
                     wy = tempWeight[vector.argMax()]
                     wyp = tempWeight[trainingLabels[j]]
-                    #calculate the tau
+
+                    #calculate the tau using the given formula
                     tau = min(c,((wyp - wy) * datum + 1.0) / ( 2 * (datum * datum)))
 
                     #in order to calculate wy=wy+τf and wy=wy-τf, first calculate τf (tempDatum)
                     tempDatum = datum.copy()
                     for d in tempDatum:
                         tempDatum[d] *= tau
-                    #wy+=τf and wy-=τf
+
+                    #If the newly learned label does not match the true label the temp weights are updated
                     if vector.argMax() != trainingLabels[j]:
                         tempWeight[trainingLabels[j]] += tempDatum
                         tempWeight[vector.argMax()] -= tempDatum
 
+            #Compute the labels for each of the data samples from validation data to compute the accuracy of the current weights
             guesses = self.classifyGivenWeight(validationData, tempWeight)
             correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
 
             tempAccuracy = 100.0 * correct / len(validationLabels)
 
-            #get the best accuracy and use it to determine the best weight
+            #If the current weights have a higher accuracy then the current best we update the current weights
             if tempAccuracy > bestAccuracy:
                 bestAccuracy = tempAccuracy
                 bestWeight = tempWeight
 
+        # return the weights with the highest accuracy on validation data
         self.weights = bestWeight
 
     def classifyGivenWeight(self, data, givenWeight ):
@@ -137,5 +141,6 @@ class MiraClassifier:
         """
         Returns a list of the 100 features with the greatest weight for some label
         """
+        # Sort weights by value and return the weights with the highest value
         featuresWeights = self.weights[label].sortedKeys()[:100]
         return featuresWeights
