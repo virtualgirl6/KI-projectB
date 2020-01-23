@@ -14,6 +14,7 @@
 
 # Perceptron implementation
 import util
+from random import shuffle
 PRINT = True
 
 class PerceptronClassifier:
@@ -50,16 +51,22 @@ class PerceptronClassifier:
         self.features = trainingData[0].keys() # could be useful later
         # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
         # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
+        
 
         for iteration in range(self.max_iterations):
             print "Starting iteration ", iteration, "..."
             for i in range(len(trainingData)):
 
                 datum = trainingData[i]
+                
+                #print("datum[i]: ", len(trainingData[i]))
+                
                 vectors = util.Counter()
                 for label in self.legalLabels:
+                    #print("label: ", label)
+                    #print("vector[label]: ", vectors[label])
                     vectors[label] = self.weights[label] * datum
-
+                #print("wy: ",self.weights[trainingLabels[i]] ,"wyp: ",self.weights[vectors.argMax()] )
                 if vectors.argMax() != trainingLabels[i]:
                     self.weights[trainingLabels[i]] += datum
                     self.weights[vectors.argMax()] -= datum
@@ -85,8 +92,4 @@ class PerceptronClassifier:
         Returns a list of the 100 features with the greatest weight for some label
         """
         featuresWeights = self.weights[label].sortedKeys()[:100]
-
-        
-    
-
         return featuresWeights

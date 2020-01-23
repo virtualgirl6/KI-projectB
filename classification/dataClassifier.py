@@ -85,20 +85,15 @@ def enhancedFeatureExtractorDigit(datum):
     #print("x: ", DIGIT_DATUM_WIDTH, "y: ", DIGIT_DATUM_HEIGHT)
     #check for vertical symmetry 
 
-    #dubbele for-loop om alle pixels af te gaan
-    """
-    daarna wordt xs/ys elke keer de symmetrische bijbehorende pixel 
-    plus check of ze gelijk zijn --> maak een nieuwe key/val in de features dictionary en dan 1 als ze gelijk zijn of 0 als anders
-    of op de manier eronder als er meer dan x aantal pixels symmetrisch zijn dan wordt het 1 anders 0
 
-    tot nu toe wordt de score eigenlijk alleen maar slechter.. :(
-
+    totalPixals = 0
     
-    """
     for x in range(DIGIT_DATUM_WIDTH):
-        xs = DIGIT_DATUM_WIDTH - x - 1  
+        xs = DIGIT_DATUM_WIDTH - x - 1
+        pixelinrow = 0  
         for y in range(DIGIT_DATUM_HEIGHT):
             ys = DIGIT_DATUM_HEIGHT - y - 1
+
             if datum.getPixel(x, y) == datum.getPixel(xs, y):
                 nmbrXSymmetricPixels += 1
                 features[("xsym",x,xs)] = 1
@@ -106,21 +101,109 @@ def enhancedFeatureExtractorDigit(datum):
                 features[("xsym",x,xs)] = 0
             if datum.getPixel(x, y) == datum.getPixel(x, ys):
                 nmbrYSymmetricPixels += 1
-                features[("ysym",x,xs)] = 1
+                features[("ysym",y,ys)] = 1
             else:
                 features[("ysym",y,ys)] = 0
 
-    """
-    if nmbrXSymmetricPixels > 650:
-        features["x sym"] = 1
-    else:
-        features["x sym"] = 0
-    if nmbrYSymmetricPixels > 650:
-        features["y sym"] = 1
-    else:
-        features["y sym"] = 0
-    """
+            if datum.getPixel(x, y) > 0:
+                  pixelinrow += 1
+        if pixelinrow > 14:
+            features[(x, "pixelinrow")] = 1
+        else:
+            features[(x, "pixelinrow")] = 0
 
+
+    boolminX = True
+    boolmaxX = True
+    minXList = []
+    maxXList = []
+    for y in range(DIGIT_DATUM_HEIGHT):
+        for x in range(DIGIT_DATUM_WIDTH):
+            if datum.getPixel(x, y) > 0 and boolminX:
+                minXList.append(x)
+    
+    for y in range(27, 0, -1):
+        for x in range(27, 0, -1):
+            if datum.getPixel(x, y) > 0 and boolmaxX:
+                maxXList.append(x)
+    
+
+    smallestX = min(minXList)
+    largestX = max(maxXList)
+
+    if smallestX > 8:
+        features["large small X"] = 1
+    else:
+        features["large small X"] = 0
+
+    if largestX < 19:
+        features["small large X"] = 1
+    else:
+        features["small large X"] = 0
+
+    if largestX - smallestX < 8:
+        print("large")
+        features["small width"] = 1
+    else:
+        print("smoll")
+        features["small width"] = 0
+
+
+    for y in range(DIGIT_DATUM_HEIGHT):
+        pixelincol = 0  
+
+        for x in range(DIGIT_DATUM_WIDTH):
+        
+            if datum.getPixel(x, y) > 0:
+                pixelincol += 1
+                
+        if pixelincol > 14:
+            features[(x, "pixelincol")] = 1
+        else:
+            features[(x, "pixelincol")] = 0       
+
+
+    for y in range(DIGIT_DATUM_HEIGHT): 
+        nmbrAdjacentPixels = 0
+        LongLine = 0
+        previous = False               
+        for x in range(DIGIT_DATUM_WIDTH):
+            if datum.getPixel(x, y) == 1 and previous == True:
+                nmbrAdjacentPixels += 1
+                if nmbrAdjacentPixels > LongLine:
+                    LongLine = nmbrAdjacentPixels
+            elif datum.getPixel(x, y) == 1 and previous == False:
+                nmbrAdjacentPixels = 1
+                previous = True
+            else:
+                nmbrAdjacentPixels = 0
+                previous = False
+        if LongLine > 6:
+            features["AdjacentY", y] = 1
+        else:
+            features["AdjacentY", y] = 0
+
+    for x in range(DIGIT_DATUM_WIDTH):
+        nmbrAdjacentPixels = 0
+        LongLine = 0
+        previous = False               
+        for y in range(DIGIT_DATUM_HEIGHT):
+            if datum.getPixel(x, y) == 1 and previous == True:
+                nmbrAdjacentPixels += 1
+                if nmbrAdjacentPixels > LongLine:
+                    LongLine = nmbrAdjacentPixels
+            elif datum.getPixel(x, y) == 1 and previous == False:
+                nmbrAdjacentPixels = 1
+                previous == True
+            else:
+                nmbrAdjacentPixels = 0
+                previous = False
+        if LongLine > 6:
+            features["AdjacentX", x] = 1
+        else:
+            features["AdjacentX", x] = 0
+        
+ 
     return features
 
 
@@ -160,14 +243,73 @@ def enhancedFeatureExtractorPacman(state):
         features[action] = util.Counter(features[action], **enhancedPacmanFeatures(state, action))
     return features, state.getLegalActions()
 
+
+
+
+
 def enhancedPacmanFeatures(state, action):
     """
     For each state, this function is called with each legal action.
     It should return a counter with { <feature name> : <feature value>, ... }
+
+    python dataClassifier.py -c perceptron -d pacman -f -g ContestAgent 
+
+
+    #sets 1 for the position of pacman and 0 otherwise
+    for x in range(20):
+        for y in range(20):
+            if (x,y) == state.getPacmanPosition():
+                
+                features[(x,y)] = 1
+            else:
+                
+                features[(x,y)] = 0
     """
     features = util.Counter()
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    successor = state.generateSuccessor(0, action)
+    agent_pos = successor.getPacmanPosition()
+    ghosts = successor.getGhostPositions()
+    ghost_state = successor.getGhostStates();
+    capsules = successor.getCapsules()
+    state_food = state.getFood()
+    food = [(x, y)
+            for x, row in enumerate(state_food)
+            for y, food in enumerate(row)
+            if food]
+
+    nearest_ghosts = sorted([util.manhattanDistance(agent_pos, i) for i in ghosts])
+    features["nearest_ghost"] = nearest_ghosts[0]
+
+
+    #print(ghost_state)
+
+    #if state.data.agentStates[nearest_ghosts[0]].scaredTimer > 0:
+    #    features[("ghost_scared", ghost_state)] = 1
+    #else: features[("ghost_scared", ghost_state)] = 0
+
+    #for i in xrange(min(len(nearest_ghosts), 1)):
+        #features[("ghost", i)] = 5 / (0.1 + nearest_ghosts[i])
+
+    nearest_caps = sorted([util.manhattanDistance(agent_pos, i) for i in capsules])
+    
+    for i in xrange(min(len(nearest_caps), 1)):
+        features[("capsule", i)] = 15 / (1 + nearest_caps[i])
+
+    nearest_food = sorted([util.manhattanDistance(agent_pos, i) for i in food])
+    for i, weight in zip(xrange(min(len(nearest_food), 5)), [1.3, 0.8] + [0.9] * 3):
+        features[("food", i)] = weight * nearest_food[i]
+
+
+    #features["capsule count"] = len(capsules) * 10
+    features["iswin"] = state.isWin()
+    features["islose"] = state.isLose()
+    features["score"] = state.getScore() #* 10
+
+
+    #features["pacman"]= agent_pos implemnteren werkt niet!
+
+
     return features
 
 
@@ -437,6 +579,7 @@ def runClassifier(args, options):
         validationLabels = samples.loadLabelsFile("digitdata/validationlabels", numTest)
         rawTestData = samples.loadDataFile("digitdata/testimages", numTest,DIGIT_DATUM_WIDTH,DIGIT_DATUM_HEIGHT)
         testLabels = samples.loadLabelsFile("digitdata/testlabels", numTest)
+
 
     # Extract features
     print "Extracting features..."

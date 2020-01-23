@@ -98,7 +98,7 @@ class MiraClassifier:
             correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
             #print(" hier gaat het om: ", 100.0 * correct / len(validationLabels))
             tempAccuracy = 100.0 * correct / len(validationLabels)
-
+            print("c: ", c, "tempAcc: ", tempAccuracy, " bestAcc: ", bestAccuracy)
             if tempAccuracy > bestAccuracy:
                 bestAccuracy = tempAccuracy
                 bestWeight = tempWeight
@@ -131,3 +131,10 @@ class MiraClassifier:
                 vectors[l] = self.weights[l] * datum
             guesses.append(vectors.argMax())
         return guesses
+
+    def findHighWeightFeatures(self, label):
+        """
+        Returns a list of the 100 features with the greatest weight for some label
+        """
+        featuresWeights = self.weights[label].sortedKeys()[:100]
+        return featuresWeights
