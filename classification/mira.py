@@ -64,41 +64,42 @@ class MiraClassifier:
 
         bestWeight = {}
         bestAccuracy = 0
-        #print("max iter: ", self.max_iterations, "len trainingdata: ", len(trainingData))
+
+        #for every constant in cGrid get the weights and accuracy
         for c in Cgrid:
             tempWeight = self.weights.copy()
             tempAccuracy = 0
 
             for i in range(self.max_iterations):
                 for j in range(len(trainingData)):
-
                     datum = trainingData[j]
                     vector = util.Counter()
 
+                    #update the weights
                     for label in self.legalLabels:
-                        vector[label] = tempWeight[label] * datum 
+                        vector[label] = tempWeight[label] * datum
 
-                    
+                    #calculate  for label y the weight and weightprime
                     wy = tempWeight[vector.argMax()]
                     wyp = tempWeight[trainingLabels[j]]
-
+                    #calculate the tau
                     tau = min(c,((wyp - wy) * datum + 1.0) / ( 2 * (datum * datum)))
 
+                    #in order to calculate wy=wy+τf and wy=wy-τf, first calculate τf (tempDatum)
                     tempDatum = datum.copy()
-
                     for d in tempDatum:
                         tempDatum[d] *= tau
-
+                    #wy+=τf and wy-=τf
                     if vector.argMax() != trainingLabels[j]:
                         tempWeight[trainingLabels[j]] += tempDatum
                         tempWeight[vector.argMax()] -= tempDatum
-            #hier nieuwe weight getraind
-            
+
             guesses = self.classifyGivenWeight(validationData, tempWeight)
             correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
-            #print(" hier gaat het om: ", 100.0 * correct / len(validationLabels))
+
             tempAccuracy = 100.0 * correct / len(validationLabels)
-            print("c: ", c, "tempAcc: ", tempAccuracy, " bestAcc: ", bestAccuracy)
+
+            #get the best accuracy and use it to determine the best weight
             if tempAccuracy > bestAccuracy:
                 bestAccuracy = tempAccuracy
                 bestWeight = tempWeight
