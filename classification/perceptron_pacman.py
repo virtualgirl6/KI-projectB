@@ -42,29 +42,28 @@ class PerceptronClassifierPacman(PerceptronClassifier):
 
 
     def train( self, trainingData, trainingLabels, validationData, validationLabels ):
+        """
+        The training loop for the perceptron_pacman passes through the training data several
+        times and updates the weight vector for each label based on classification errors.
+        """
         self.features = trainingData[0][0]['Stop'].keys() # could be useful later
         # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
         # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
 
+        # The model is updated max_iteration times for each iteration in range of max_iterations we go through the training data
         for iteration in range(self.max_iterations):
             print "Starting iteration ", iteration, "..."
             for i in range(len(trainingData)):
 
+                #split the training data in datum and legalmoves so we can update the weight vector
                 datum, legalMoves = trainingData[i]
-                #print(datum)
-                #print("datum: ", datum[0]['West']['foodCount'])
-                
                 vectors = util.Counter()
-                for move in legalMoves:
-                    #print("label: ", label)
-                    #print("vector[label]: ", vectors[label])
-                    vectors[move] = self.weights * datum[move]
-                #print(self.weights)
 
+                # Compute updated weight vector using the curren training datum for each move using the weights * datum[move]
+                for move in legalMoves:
+                    vectors[move] = self.weights * datum[move]
                 
-                
-                
+                # Update self.weights if the current learned output label does not match the correct label
                 if vectors.argMax() != trainingLabels[i]:
-                    #print("vectorargmax ", vectors.argMax(), "trainlabel ", trainingLabels[i])
                     self.weights += datum[trainingLabels[i]]
                     self.weights -= datum[vectors.argMax()]

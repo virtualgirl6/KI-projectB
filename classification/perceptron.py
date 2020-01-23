@@ -53,20 +53,21 @@ class PerceptronClassifier:
         # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
         
 
+        # Iterate through the training data max_iteration times, for each iteration we go through the each training sample.
         for iteration in range(self.max_iterations):
             print "Starting iteration ", iteration, "..."
+
+            # For each training sample we compute an updated weight vector on the bases of the current weights
             for i in range(len(trainingData)):
 
                 datum = trainingData[i]
-                
-                #print("datum[i]: ", len(trainingData[i]))
-                
                 vectors = util.Counter()
+                
+                # Compute updated weight vector using the current training datum for each move using the weights * datum
                 for label in self.legalLabels:
-                    #print("label: ", label)
-                    #print("vector[label]: ", vectors[label])
                     vectors[label] = self.weights[label] * datum
-                #print("wy: ",self.weights[trainingLabels[i]] ,"wyp: ",self.weights[vectors.argMax()] )
+                
+                # If the label of the learned vector is different from the correct label then we update self.weights
                 if vectors.argMax() != trainingLabels[i]:
                     self.weights[trainingLabels[i]] += datum
                     self.weights[vectors.argMax()] -= datum
@@ -91,5 +92,7 @@ class PerceptronClassifier:
         """
         Returns a list of the 100 features with the greatest weight for some label
         """
+
+        # Sort weights by value and return the weights with the highest value
         featuresWeights = self.weights[label].sortedKeys()[:100]
         return featuresWeights
